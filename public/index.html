@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #terminal {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            background-color: #fff;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: #000;
+        }
+        .progress {
+            width: 100%;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+            border-radius: 8px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            border-radius: 4px;
+        }
+        .results {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+        .result-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+        }
+        .filter {
+            margin-top: 20px;
+        }
+        .stats {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+        .stats h2 {
+            margin-top: 0;
+        }
+        .stats p {
+            margin: 5px 0;
+        }
+        .light-green {
+            background-color: #d4edda;
+        }
+        .light-gray {
+            background-color: #f8f9fa;
+        }
+        .yellow {
+            background-color: #fff3cd;
+        }
+        .cyan {
+            background-color: #d4f1f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Checker</h1>
+    <div class="container">
+        <div class="section light-green">
+            <h2>Email and Proxy Settings</h2>
+            <form id="emailForm">
+                <label for="emailPassFile">Email:Pass File</label>
+                <input type="file" id="emailPassFile" name="emailPassFile" accept=".txt" required><br><br>
+
+                <label for="apiKey">API Key</label>
+                <input type="text" id="apiKey" name="apiKey" required><br><br>
+
+                <label for="httpsRequest">HTTPS Request</label>
+                <select id="httpsRequest" name="httpsRequest" required>
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                </select><br><br>
+
+                <label for="proxyList">Proxy List</label>
+                <textarea id="proxyList" name="proxyList" rows="4" required></textarea><br><br>
+
+                <label for="useProxy">Use Proxy</label>
+                <input type="checkbox" id="useProxy" name="useProxy"><br><br>
+
+                <label for="emailProviders">Email Providers</label>
+                <select id="emailProviders" name="emailProviders" multiple>
+                    <option value="hotmail">Hotmail</option>
+                    <option value="yandex">Yandex</option>
+                    <option value="gmail">Gmail</option>
+                    <option value="outlook">Outlook</option>
+                    <option value="protonmail">ProtonMail</option>
+                    <option value="zoho">Zoho</option>
+                    <option value="mailcom">Mail.com</option>
+                    <option value="aol">AOL</option>
+                    <option value="icloud">iCloud</option>
+                </select><br><br>
+
+                <label for="pop3">POP3</label>
+                <input type="checkbox" id="pop3" name="pop3"><br><br>
+
+                <label for="imap">IMAP</label>
+                <input type="checkbox" id="imap" name="imap"><br><br>
+
+                <label for="smtp">SMTP</label>
+                <input type="checkbox" id="smtp" name="smtp"><br><br>
+
+                <button type="button" onclick="startCheck()">Start Check</button>
+                <button type="button" onclick="stopCheck()">Stop Check</button>
+                <button type="button" onclick="resetCheck()">Reset Check</button>
+                <button type="button" onclick="parseProxies()">Parse Proxies</button>
+            </form>
+        </div>
+
+        <div class="section light-gray">
+            <h2>Terminal</h2>
+            <pre id="terminal"></pre>
+        </div>
+
+        <div class="section yellow">
+            <h2>Progress</h2>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+        </div>
+
+        <div class="section cyan">
+            <h2>Results</h2>
+            <div class="results" id="results"></div>
+        </div>
+
+        <div class="section">
+            <h2>Filter</h2>
+            <label for="filterProvider">Filter by Provider:</label>
+            <select id="filterProvider">
+                <option value="">All</option>
+                <option value="hotmail">Hotmail</option>
+                <option value="yandex">Yandex</option>
+                <option value="gmail">Gmail</option>
+                <option value="outlook">Outlook</option>
+                <option value="protonmail">ProtonMail</option>
+                <option value="zoho">Zoho</option>
+                <option value="mailcom">Mail.com</option>
+                <option value="aol">AOL</option>
+                <option value="icloud">iCloud</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="stats">
+        <h2>Statistics</h2>
+        <p>SMTP Success: <span id="smtpSuccess">0</span></p>
+        <p>IMAP Success: <span id="imapSuccess">0</span></p>
+        <p>POP3 Success: <span id="pop3Success">0</span></p>
+        <p>Errors: <span id="errors">0</span></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
